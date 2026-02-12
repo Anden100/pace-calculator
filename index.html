@@ -104,22 +104,50 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div class="bg-gray-50 rounded-lg p-3 md:p-4 text-center">
             <div class="text-sm text-gray-600 mb-1">Pace / km</div>
-            <div class="text-2xl font-mono font-bold text-blue-600" x-text="getPaceCalculations().pacePerKm"></div>
+            <input 
+              type="text" 
+              inputmode="decimal"
+              :value="getPaceCalculations().pacePerKm"
+              @change="setTimeFromPacePerKm($event.target.value)"
+              class="w-24 px-2 py-1 border-0 bg-transparent rounded text-center text-2xl font-mono font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0:00"
+            >
             <div class="text-xs text-gray-500">min/km</div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3 md:p-4 text-center">
             <div class="text-sm text-gray-600 mb-1">Pace / mile</div>
-            <div class="text-2xl font-mono font-bold text-blue-600" x-text="getPaceCalculations().pacePerMile"></div>
+            <input 
+              type="text" 
+              inputmode="decimal"
+              :value="getPaceCalculations().pacePerMile"
+              @change="setTimeFromPacePerMile($event.target.value)"
+              class="w-24 px-2 py-1 border-0 bg-transparent rounded text-center text-2xl font-mono font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0:00"
+            >
             <div class="text-xs text-gray-500">min/mile</div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3 md:p-4 text-center">
             <div class="text-sm text-gray-600 mb-1">Speed</div>
-            <div class="text-2xl font-mono font-bold text-green-600" x-text="getPaceCalculations().speedKmh"></div>
+            <input 
+              type="text" 
+              inputmode="decimal"
+              :value="getPaceCalculations().speedKmh"
+              @change="setTimeFromSpeedKmh($event.target.value)"
+              class="w-24 px-2 py-1 border-0 bg-transparent rounded text-center text-2xl font-mono font-bold text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="0.0"
+            >
             <div class="text-xs text-gray-500">km/h</div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3 md:p-4 text-center">
             <div class="text-sm text-gray-600 mb-1">Speed</div>
-            <div class="text-2xl font-mono font-bold text-green-600" x-text="getPaceCalculations().speedMph"></div>
+            <input 
+              type="text" 
+              inputmode="decimal"
+              :value="getPaceCalculations().speedMph"
+              @change="setTimeFromSpeedMph($event.target.value)"
+              class="w-24 px-2 py-1 border-0 bg-transparent rounded text-center text-2xl font-mono font-bold text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="0.0"
+            >
             <div class="text-xs text-gray-500">mph</div>
           </div>
         </div>

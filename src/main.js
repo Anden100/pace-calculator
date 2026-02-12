@@ -117,6 +117,83 @@ document.addEventListener('alpine:init', () => {
           projectedTime: this.formatTime(projectedTime)
         }
       })
+    },
+
+    parsePaceInput(paceStr) {
+      // Parse pace input like "4:30" or "4.5" into seconds
+      if (!paceStr || paceStr.trim() === '') return null
+      paceStr = paceStr.trim()
+      
+      // Try colon format: 4:30
+      if (paceStr.includes(':')) {
+        const parts = paceStr.split(':')
+        const minutes = parseInt(parts[0]) || 0
+        const seconds = parseInt(parts[1]) || 0
+        return (minutes * 60) + seconds
+      }
+      
+      // Try decimal format: 4.5 = 4:30
+      const decimal = parseFloat(paceStr)
+      if (!isNaN(decimal) && decimal > 0) {
+        const minutes = Math.floor(decimal)
+        const seconds = Math.round((decimal - minutes) * 60)
+        return (minutes * 60) + seconds
+      }
+      
+      return null
+    },
+    
+    setTimeFromPacePerKm(paceStr) {
+      const secondsPerKm = this.parsePaceInput(paceStr)
+      if (secondsPerKm === null || secondsPerKm <= 0) return
+      
+      const distanceInfo = this.getSelectedDistanceInfo()
+      if (!distanceInfo) return
+      
+      const totalSeconds = Math.round(secondsPerKm * distanceInfo.km)
+      this.hours = Math.floor(totalSeconds / 3600)
+      this.minutes = Math.floor((totalSeconds % 3600) / 60)
+      this.seconds = totalSeconds % 60
+    },
+    
+    setTimeFromPacePerMile(paceStr) {
+      const secondsPerMile = this.parsePaceInput(paceStr)
+      if (secondsPerMile === null || secondsPerMile <= 0) return
+      
+      const distanceInfo = this.getSelectedDistanceInfo()
+      if (!distanceInfo) return
+      
+      const totalSeconds = Math.round(secondsPerMile * distanceInfo.miles)
+      this.hours = Math.floor(totalSeconds / 3600)
+      this.minutes = Math.floor((totalSeconds % 3600) / 60)
+      this.seconds = totalSeconds % 60
+    },
+    
+    setTimeFromSpeedKmh(speedStr) {
+      const speedKmh = parseFloat(speedStr)
+      if (isNaN(speedKmh) || speedKmh <= 0) return
+      
+      const distanceInfo = this.getSelectedDistanceInfo()
+      if (!distanceInfo) return
+      
+      // time = distance / speed
+      const totalSeconds = Math.round((distanceInfo.km / speedKmh) * 3600)
+      this.hours = Math.floor(totalSeconds / 3600)
+      this.minutes = Math.floor((totalSeconds % 3600) / 60)
+      this.seconds = totalSeconds % 60
+    },
+    
+    setTimeFromSpeedMph(speedStr) {
+      const speedMph = parseFloat(speedStr)
+      if (isNaN(speedMph) || speedMph <= 0) return
+      
+      const distanceInfo = this.getSelectedDistanceInfo()
+      if (!distanceInfo) return
+      
+      const totalSeconds = Math.round((distanceInfo.miles / speedMph) * 3600)
+      this.hours = Math.floor(totalSeconds / 3600)
+      this.minutes = Math.floor((totalSeconds % 3600) / 60)
+      this.seconds = totalSeconds % 60
     }
   }))
 })
