@@ -22,7 +22,7 @@
             <div class="flex gap-2">
               <template x-for="distance in distances" :key="distance.km">
                 <button
-                  @click="const currentPace = getTotalSeconds() / getSelectedDistanceInfo().km; const newTime = Math.round(currentPace * distance.km); hours = Math.floor(newTime / 3600); minutes = Math.floor((newTime % 3600) / 60); seconds = newTime % 60; selectedDistance = distance.km"
+                  @click="selectDistance(distance)"
                   :class="distance.km == selectedDistance ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'"
                   class="flex-1 px-2 md:px-4 py-2 border rounded-lg font-medium cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                 >
@@ -101,7 +101,7 @@
         </div>
         
         <!-- Pace Results -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 md:mb-8">
           <div class="bg-gray-50 rounded-lg p-3 md:p-4 text-center">
             <div class="text-sm text-gray-600 mb-1">Pace / km</div>
             <input 
@@ -151,10 +151,21 @@
             <div class="text-xs text-gray-500">mph</div>
           </div>
         </div>
-        
-        <!-- Projected Times for Other Distances -->
+
+        <!-- VDOT Score -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-4 md:p-6 mb-8 text-center text-white">
+          <div class="text-sm font-medium text-blue-100 mb-1">VDOT Score</div>
+          <div class="text-4xl md:text-5xl font-bold font-mono" x-text="getCurrentVDOT() || '--'"></div>
+          <div class="text-sm text-blue-100 mt-1">Jack Daniels' Running Performance</div>
+        </div>
+
+        <!-- VDOT-Based Equivalent Performances -->
         <div class="bg-gray-50 rounded-lg p-4 md:p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-3 md:mb-4">Projected Times at This Pace</h3>
+          <div class="flex items-center justify-between mb-3 md:mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Equivalent Performances (VDOT)</h3>
+            <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">Jack Daniels' Formula</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">Predicted race times at equivalent performance levels across different distances.</p>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
@@ -164,11 +175,11 @@
                 </tr>
               </thead>
               <tbody>
-                <template x-for="proj in getProjectedTimes()" :key="proj.name">
-                  <tr class="border-b border-gray-200" :class="{ 'bg-blue-50': proj.km === selectedDistance }">
+                <template x-for="proj in getVDOTProjections()" :key="proj.name">
+                  <tr class="border-b border-gray-200" :class="{ 'bg-blue-50': proj.isSelected }">
                     <td class="py-2 md:py-3 px-2 md:px-4" x-text="proj.name"></td>
-                    <td class="py-2 md:py-3 px-2 md:px-4 text-right font-mono font-semibold" 
-                        :class="proj.km === selectedDistance ? 'text-blue-600' : 'text-gray-700'"
+                    <td class="py-2 md:py-3 px-2 md:px-4 text-right font-mono font-semibold"
+                        :class="proj.isSelected ? 'text-blue-600' : 'text-gray-700'"
                         x-text="proj.projectedTime"></td>
                   </tr>
                 </template>
@@ -179,7 +190,8 @@
         
         <!-- Info Section -->
         <div class="mt-6 md:mt-8 p-3 md:p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-          <p><strong>How to use:</strong> Select a distance and enter your goal time. The calculator will show your required pace and speed, plus projected finish times for other distances if you maintain that pace.</p>
+          <p class="mb-2"><strong>How to use:</strong> Select a distance and enter your goal time. The calculator will show your pace, speed, VDOT score, and equivalent race performances.</p>
+          <p><strong>VDOT</strong> (V̇O2 max) is a measure of running fitness developed by coach Jack Daniels. It allows you to compare performances across different distances and predict race times.</p>
         </div>
       </div>
     </div>

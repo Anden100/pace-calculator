@@ -1,5 +1,6 @@
 import './style.css'
 import Alpine from 'alpinejs'
+import { calculateVDOT, calculateTimeFromVDOT, getVDOTProjectedTimes, formatTime as vdotFormatTime, formatPace as vdotFormatPace } from './vdot.js'
 
 window.Alpine = Alpine
 
@@ -12,7 +13,10 @@ document.addEventListener('alpine:init', () => {
       { name: 'Half Marathon', km: 21.0975, miles: 13.1094 },
       { name: 'Marathon', km: 42.195, miles: 26.2188 },
     ],
-    
+
+    // Conversion constant: 1 mile = 1.60934 kilometers
+    KM_PER_MILE: 1.60934,
+
     // Selected distance
     selectedDistance: 5, // Default to 5K
     
@@ -70,7 +74,23 @@ document.addEventListener('alpine:init', () => {
       this.minutes = Math.floor((totalSeconds % 3600) / 60)
       this.seconds = totalSeconds % 60
     },
-    
+
+    selectDistance(distance) {
+      // Calculate current VDOT from current performance
+      const currentVDOT = this.getCurrentVDOT()
+
+      if (currentVDOT !== null) {
+        // Use VDOT to calculate equivalent time for new distance
+        const newTimeMinutes = calculateTimeFromVDOT(distance.km * 1000, currentVDOT)
+        const totalSeconds = Math.round(newTimeMinutes * 60)
+        this.hours = Math.floor(totalSeconds / 3600)
+        this.minutes = Math.floor((totalSeconds % 3600) / 60)
+        this.seconds = totalSeconds % 60
+      }
+
+      this.selectedDistance = distance.km
+    },
+
     getPaceCalculations() {
       const totalSeconds = this.getTotalSeconds()
       const distanceInfo = this.getSelectedDistanceInfo()
@@ -87,7 +107,7 @@ document.addEventListener('alpine:init', () => {
       const secondsPerKm = totalSeconds / distanceInfo.km
       const secondsPerMile = totalSeconds / distanceInfo.miles
       const speedKmh = 3600 / secondsPerKm
-      const speedMph = speedKmh / 1.60934
+      const speedMph = speedKmh / this.KM_PER_MILE
       
       return {
         pacePerKm: this.formatPace(secondsPerKm),
@@ -97,26 +117,35 @@ document.addEventListener('alpine:init', () => {
       }
     },
     
-    getProjectedTimes() {
+    getCurrentVDOT() {
       const totalSeconds = this.getTotalSeconds()
       const distanceInfo = this.getSelectedDistanceInfo()
       
       if (totalSeconds <= 0 || !distanceInfo) {
-        return this.distances.map(d => ({
-          ...d,
-          projectedTime: '0:00'
-        }))
+        return null
       }
       
-      const secondsPerKm = totalSeconds / distanceInfo.km
+      const distanceMeters = distanceInfo.km * 1000
+      const timeMinutes = totalSeconds / 60
       
-      return this.distances.map(d => {
-        const projectedTime = secondsPerKm * d.km
-        return {
-          ...d,
-          projectedTime: this.formatTime(projectedTime)
-        }
-      })
+      return calculateVDOT(distanceMeters, timeMinutes)
+    },
+    
+    getVDOTProjections() {
+      const vdot = this.getCurrentVDOT()
+      
+      if (vdot === null) {
+        return []
+      }
+      
+      const projections = getVDOTProjectedTimes(vdot)
+      
+      return projections.map(proj => ({
+        name: proj.name,
+        km: proj.km,
+        projectedTime: vdotFormatTime(proj.projectedSeconds),
+        isSelected: proj.km === this.selectedDistance
+      }))
     },
 
     parsePaceInput(paceStr) {
